@@ -16,12 +16,10 @@ def run_yeny():
     audio_stream = None
 
     try:
-        # --- CORRECCIÓN FINAL ---
-        # Añadimos 'model_path' para indicarle que use el motor en español
         porcupine = pvporcupine.create(
             access_key=ACCESS_KEY,
             keyword_paths=['wake-word/Maria_es_windows_v3_0_0.ppn'],
-            model_path='wake-word/porcupine_params_es.pv' # <-- ¡Línea nueva y clave!
+            model_path='wake-word/porcupine_params_es.pv'
         )
 
         pa = pyaudio.PyAudio()
@@ -47,26 +45,72 @@ def run_yeny():
                 
                 command = listen()
                 if command:
-                    # (El resto del código no cambia)
                     if 'adiós' in command or 'apágate' in command:
                         talk("Entendido. Desconectando.")
                         break 
                     
-                    if 'volumen' in command:
+                    executed = False
+
+                    # Comandos de búsqueda
+                    if 'busca' in command or 'wikipedia' in command:
+                        query = command.replace('busca en wikipedia sobre', '').replace('busca sobre', '').replace('busca', '').strip()
+                        if query:
+                            actions.search_wikipedia(query)
+                        else:
+                            talk("No entendí qué quieres buscar.")
+                        executed = True
+
+                    # Comandos de abrir aplicaciones/webs
+                    elif 'abrir' in command:
+                        if 'brave' in command:
+                            actions.open_brave()
+                        else:
+                            match = re.search(r'abrir (\S+)', command)
+                            site = match.group(1).replace('.com', '') + '.com' if match else "google.com"
+                            actions.open_browser(site)
+                        executed = True
+
+                    # Comandos de control del sistema
+                    elif 'volumen' in command:
                         if 'sube' in command: actions.set_volume("subir")
                         elif 'baja' in command: actions.set_volume("bajar")
                         elif 'silencio' in command: actions.set_volume("silencio")
+                        executed = True
+                    
+                    elif 'brillo' in command:
+                        match = re.search(r'(\d+)', command)
+                        if match:
+                            level = int(match.group(1))
+                            actions.set_brightness(level)
+                        else:
+                            talk("No entendí a qué nivel ajustar el brillo.")
+                        executed = True
+                    
+                    # Comandos de YouTube (CORREGIDO)
+                    elif 'youtube' in command:
+                        if 'siguiente' in command:
+                            actions.control_youtube('siguiente')
+                        elif 'anterior' in command:
+                            actions.control_youtube('anterior')
+                        elif 'pausa' in command:
+                            actions.control_youtube('pausa')
+                        elif 'ponle play' in command or 'reanudar' in command:
+                            actions.control_youtube('play')
+                        executed = True
+                        
+                    # Comandos de información
                     elif 'qué hora es' in command:
                         actions.tell_time()
+                        executed = True
+                    
                     elif 'qué día es hoy' in command:
                         actions.tell_date()
-                    elif 'abrir' in command:
-                        match = re.search(r'abrir (\S+)', command)
-                        site = match.group(1).replace('.com', '') + '.com' if match else "google.com"
-                        actions.open_browser(site)
-                    else:
+                        executed = True
+                    
+                    # Si ningún comando coincide
+                    if not executed:
                         talk("No he entendido ese comando.")
-                
+
                 print("Esperando la palabra de activación ('Maria')...")
 
     finally:

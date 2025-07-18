@@ -4,8 +4,13 @@ def listen():
     r = sr.Recognizer()
     with sr.Microphone() as source:
         print("Escuchando comando...")
+        # Aumentamos el umbral de energía para filtrar ruido.
+        # 300 es un buen punto de partida, puedes subirlo si hay mucho ruido.
+        r.energy_threshold = 300
+        
         r.pause_threshold = 1
-        r.adjust_for_ambient_noise(source, duration=1)
+        # Comentamos esta línea porque ya fijamos el umbral manualmente
+        # r.adjust_for_ambient_noise(source, duration=1) 
         audio = r.listen(source)
     try:
         print("Reconociendo...")
