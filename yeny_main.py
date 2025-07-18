@@ -9,7 +9,6 @@ import re
 def run_yeny():
     """Bucle principal que escucha la palabra de activación y luego los comandos."""
 
-    # Tu Access Key ya está incluida aquí
     ACCESS_KEY = "/XDnOtU4HxQ2opd2UQ5dlUytQC+9D+aEXk3BGIJiJgMhhcqhry/5CA=="
     
     porcupine = None
@@ -17,10 +16,11 @@ def run_yeny():
     audio_stream = None
 
     try:
-        # Usamos "computer" y "jarvis" como palabras para activar a Yeny
+        # --- CÓDIGO CORREGIDO ---
+        # Ahora usamos el nombre de archivo que me mostraste.
         porcupine = pvporcupine.create(
             access_key=ACCESS_KEY,
-            keywords=['computer', 'jarvis'] 
+            keyword_paths=['wake-word/Maria_es_windows_v3_0_0.ppn'] 
         )
 
         pa = pyaudio.PyAudio()
@@ -32,7 +32,8 @@ def run_yeny():
             frames_per_buffer=porcupine.frame_length
         )
         
-        print("Esperando la palabra de activación ('computer' o 'jarvis')...")
+        # Como el modelo es para "Maria", esa es la palabra que debes decir.
+        print("Esperando la palabra de activación ('Maria')...")
         talk("Sistema iniciado. Esperando activación.")
 
         while True:
@@ -41,7 +42,7 @@ def run_yeny():
             keyword_index = porcupine.process(pcm)
 
             if keyword_index >= 0:
-                print("Palabra de activación detectada.")
+                print("Palabra de activación 'Maria' detectada.")
                 talk("Sí, dígame.")
                 
                 command = listen()
@@ -65,7 +66,7 @@ def run_yeny():
                     else:
                         talk("No he entendido ese comando.")
                 
-                print("Esperando la palabra de activación...")
+                print("Esperando la palabra de activación ('Maria')...")
 
     finally:
         if audio_stream is not None:
