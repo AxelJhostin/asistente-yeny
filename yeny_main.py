@@ -16,11 +16,12 @@ def run_yeny():
     audio_stream = None
 
     try:
-        # --- CÓDIGO CORREGIDO ---
-        # Ahora usamos el nombre de archivo que me mostraste.
+        # --- CORRECCIÓN FINAL ---
+        # Añadimos 'model_path' para indicarle que use el motor en español
         porcupine = pvporcupine.create(
             access_key=ACCESS_KEY,
-            keyword_paths=['wake-word/Maria_es_windows_v3_0_0.ppn'] 
+            keyword_paths=['wake-word/Maria_es_windows_v3_0_0.ppn'],
+            model_path='wake-word/porcupine_params_es.pv' # <-- ¡Línea nueva y clave!
         )
 
         pa = pyaudio.PyAudio()
@@ -32,7 +33,6 @@ def run_yeny():
             frames_per_buffer=porcupine.frame_length
         )
         
-        # Como el modelo es para "Maria", esa es la palabra que debes decir.
         print("Esperando la palabra de activación ('Maria')...")
         talk("Sistema iniciado. Esperando activación.")
 
@@ -47,6 +47,7 @@ def run_yeny():
                 
                 command = listen()
                 if command:
+                    # (El resto del código no cambia)
                     if 'adiós' in command or 'apágate' in command:
                         talk("Entendido. Desconectando.")
                         break 
